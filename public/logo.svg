@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
+  <defs>
+    <!-- 背景暗色科技渐变 -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181824" />
+      <stop offset="50%" stop-color="#0f1016" />
+      <stop offset="100%" stop-color="#08080c" />
+    </linearGradient>
+
+    <!-- 边框细微反光 -->
+    <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.6" />
+    </linearGradient>
+
+    <!-- 绚丽彩虹流线渐变 -->
+    <linearGradient id="rainbowGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF3366" />
+      <stop offset="20%" stop-color="#FF6B3D" />
+      <stop offset="40%" stop-color="#FFD13B" />
+      <stop offset="60%" stop-color="#1DD586" />
+      <stop offset="80%" stop-color="#00C9FF" />
+      <stop offset="100%" stop-color="#9E00FF" />
+    </linearGradient>
+
+    <!-- 对话气泡微拟物玻璃渐变 -->
+    <linearGradient id="bubbleGradient" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#dce3f2" stop-opacity="0.85" />
+    </linearGradient>
+
+    <!-- 彩虹星星渐变 -->
+    <linearGradient id="sparkleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="50%" stop-color="#7928CA" />
+      <stop offset="100%" stop-color="#FF0080" />
+    </linearGradient>
+
+    <!-- 霓虹发光滤镜 -->
+    <filter id="rainbowGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- 对话泡阴影 -->
+    <filter id="bubbleShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- 图标圆角背景 -->
+  <rect width="512" height="512" rx="116" fill="url(#bgGradient)" />
+  <rect width="510" height="510" x="1" y="1" rx="115" fill="none" stroke="url(#borderGradient)" stroke-width="2" />
+
+  <!-- 环抱式彩虹光环 (带发光) -->
+  <g filter="url(#rainbowGlow)">
+    <path d="M 120 330 C 80 230 140 110 260 90 C 370 70 430 160 415 250" 
+          fill="none" 
+          stroke="url(#rainbowGradient)" 
+          stroke-width="24" 
+          stroke-linecap="round" 
+          opacity="0.9" />
+
+    <path d="M 95 290 C 70 190 140 85 270 70 C 390 55 455 155 435 270" 
+          fill="none" 
+          stroke="url(#rainbowGradient)" 
+          stroke-width="12" 
+          stroke-linecap="round" 
+          opacity="0.5" />
+  </g>
+
+  <!-- AI 对话气泡主身 -->
+  <g filter="url(#bubbleShadow)">
+    <!-- 对话泡轮廓：圆润矩形 + 对话小尾巴 -->
+    <path d="M 160 180
+             C 160 146.86 186.86 120 220 120
+             L 340 120
+             C 373.14 120 400 146.86 400 180
+             L 400 270
+             C 400 303.14 373.14 330 340 330
+             L 245 330
+             L 180 380
+             C 170 388 160 382 160 370
+             L 160 330
+             C 160 330 160 330 160 330
+             Z" 
+          fill="url(#bubbleGradient)" />
+  </g>
+
+  <!-- 气泡内的 AI 核心要素：绚彩 AI 灵感四角星 -->
+  <!-- 主星 -->
+  <path d="M 280 170 
+           Q 280 225 225 225 
+           Q 280 225 280 280 
+           Q 280 225 335 225 
+           Q 280 225 280 170 Z" 
+        fill="url(#sparkleGradient)" />
+
+  <!-- 伴随副星 (左上小星星，代表灵动与智慧) -->
+  <path d="M 220 160 
+           Q 220 185 195 185 
+           Q 220 185 220 210 
+           Q 220 185 245 185 
+           Q 220 185 220 160 Z" 
+        fill="url(#sparkleGradient)" 
+        opacity="0.85" />
+
+  <!-- 伴随点缀光点 -->
+  <circle cx="340" cy="180" r="5" fill="#FF3366" opacity="0.9" />
+  <circle cx="325" cy="275" r="4" fill="#00C9FF" opacity="0.8" />
+</svg>
