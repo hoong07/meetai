@@ -1,13 +1,16 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { OctagonAlertIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-
+// import { createAuthClient } from "better-auth/client"
+import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { FaGithub , FaGoogle } from "react-icons/fa"
 
 import { Card , CardContent} from '@/components/ui/card';
 import { 
@@ -31,6 +34,8 @@ const formSchema = z.object({
 });
 
 const SignInView = () => {
+    const router = useRouter()
+
     const [error , setError] = useState<string | null>(null)
     const [pending , setPending] = useState(false)
 
@@ -42,14 +47,40 @@ const SignInView = () => {
             password: "",
         }, // 设置默认值
     })
-    // 处理表单逻辑
+
+// const authClient =  createAuthClient() 全局只需要一个 写在auth-client.ts中 避免session缓存两个页面登录状态不统一、cookie/存储同步的风险
+
+//  社交媒体验证登陆
+    const onSocail = (provider: "github" | "google") => {
+        setError(null)
+        setPending(true)
+
+        authClient.signIn.social(
+            {
+                provider,
+                callbackURL: "/"
+            }
+            , {
+            onError: (error) => {
+                setError(error.error.message)
+                setPending(false)
+            },
+            onSuccess: () => {
+                setPending(false)
+                router.push('/')
+            }
+        })
+    }
+
+    // 处理表单逻辑 -> 邮箱登陆
     const onSubmit = (data: z.infer<typeof formSchema>) => {
         setError(null)
         setPending(true)
 
         authClient.signIn.email({
             email: data.email,
-            password: data.password
+            password: data.password,
+            callbackURL: "/"
             
         },
         {
@@ -150,18 +181,20 @@ const SignInView = () => {
                         {/* 社交账号登录 */}
                         <div className="grid grid-cols-2 gap-6">
                             <Button
+                                onClick={() => onSocail("github")}
                                 variant="outline" //描边按钮
                                 className="w-full"
                                 type="button"
                             >
-                                Github
+                                <FaGithub></FaGithub>
                             </Button>
                             <Button
+                                onClick={() => onSocail("google")}
                                 variant="outline"
                                 className="w-full"
                                 type="button"
                             >
-                                Google
+                                <FaGoogle></FaGoogle>
                             </Button>
                         </div>
                         {/* 注册跳转 */}
@@ -174,7 +207,7 @@ const SignInView = () => {
                     </form>
                 </Form>
                 {/* 信息 */}
-                <div className="flex flex-col items-center justify-center p-6 text-center bg-blue-200">
+                <div className="flex flex-col items-center justify-center p-6 text-center bg-radial from-sidebar-accent to-sidebar">
                     <img src="/logo.svg" alt="logo-img" 
                         className="w-24 h-24"
                     />

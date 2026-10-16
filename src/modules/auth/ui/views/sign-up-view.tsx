@@ -6,8 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { OctagonAlertIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+import { FaGithub , FaGoogle } from "react-icons/fa"
 
 import { Card , CardContent} from '@/components/ui/card';
 import { 
@@ -40,8 +42,31 @@ const formSchema = z.object({
 });
 
 const SignUpView = () => {
+    const router = useRouter()
     const [error , setError] = useState<string | null>(null)
     const [pending , setPending] = useState(false)
+
+    //  社交媒体验证登陆
+    const onSocail = (provider: "github" | "google") => {
+        setError(null)
+        setPending(true)
+
+        authClient.signIn.social(
+            {
+                provider,
+                callbackURL: "/",
+            }
+            , {
+            onError: (error) => {
+                setError(error.error.message)
+                setPending(false)
+            },
+            onSuccess: () => {
+                setPending(false)
+                router.push('/')
+            }
+        })
+    }
 
     // useform 和zodResolver结合使用，进行表单验证 -> 自动接管 -> 无需手写onchange...
     const form = useForm<z.infer<typeof formSchema>>({
@@ -62,6 +87,7 @@ const SignUpView = () => {
             name: data.name,
             email: data.email,
             password: data.password, //只需要传一次密码给后端 confirm密码是前端验证使用的
+            callbackURL: "/"
         },
         {
             onError: (error) => {
@@ -202,18 +228,20 @@ const SignUpView = () => {
                         {/* 社交账号登录 */}
                         <div className="grid grid-cols-2 gap-6">
                             <Button
+                                onClick={() => onSocail("github")}
                                 variant="outline" //描边按钮
                                 className="w-full"
                                 type="button"
                             >
-                                Github
+                                <FaGithub></FaGithub>
                             </Button>
                             <Button
+                                onClick={() => onSocail("google")}
                                 variant="outline"
                                 className="w-full"
                                 type="button"
                             >
-                                Google
+                                <FaGoogle></FaGoogle>
                             </Button>
                         </div>
                         {/* 注册跳转 */}
@@ -226,7 +254,7 @@ const SignUpView = () => {
                     </form>
                 </Form>
                 {/* 信息 */}
-                <div className="flex flex-col items-center justify-center p-6 text-center bg-blue-200">
+                <div className="flex flex-col items-center justify-center p-6 text-center bg-radial from-sidebar-accent to-sidebar">
                     <img src="/logo.svg" alt="logo-img" 
                         className="w-24 h-24"
                     />
