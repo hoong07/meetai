@@ -42,7 +42,7 @@ export const DashboardUserButton = () => {
             bg-white/5 hover:bg-white/10 overflow-hidden" >
                 {data.user.image ? (
                     <Avatar>
-                        <AvatarImage />
+                        <AvatarImage src={data.user.image} />
                     </Avatar>
                 ) : (
                     <img src={`data:image/svg+xml;utf8,${encodeURIComponent(svg)}`} alt="avatar" 

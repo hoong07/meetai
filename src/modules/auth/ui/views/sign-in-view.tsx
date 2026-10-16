@@ -181,6 +181,7 @@ const SignInView = () => {
                         {/* 社交账号登录 */}
                         <div className="grid grid-cols-2 gap-6">
                             <Button
+                                disabled={pending}
                                 onClick={() => onSocail("github")}
                                 variant="outline" //描边按钮
                                 className="w-full"

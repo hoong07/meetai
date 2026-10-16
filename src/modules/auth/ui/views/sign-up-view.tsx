@@ -185,7 +185,7 @@ const SignUpView = () => {
                                 name="passwordConfirm" // 字段名 绑定zodschema验证
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>密码</FormLabel>
+                                        <FormLabel>确认密码</FormLabel>
                                         <FormControl>
                                             <Input 
                                                 placeholder="********"
