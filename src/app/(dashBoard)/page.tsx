@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 
 const Home = async () => {
+
   const session = await auth.api.getSession({
     headers: await headers(),
   }) // 解析请求头
