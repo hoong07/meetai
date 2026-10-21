@@ -29,8 +29,8 @@ const firstSection = [
     },
     {
         icon: BotIcon,
-        label: "Agent",
-        href: "/agent"
+        label: "Agents",
+        href: "/agents"
     }
 ]
 

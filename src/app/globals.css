@@ -50,7 +50,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   /* 主色 eg: button  */
-  --primary: oklch(75.123% 0.15555 65.469);
+  --primary: oklch(71.791% 0.19879 143.941);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -123,5 +123,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 }
