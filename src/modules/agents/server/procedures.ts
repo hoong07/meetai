@@ -1,19 +1,23 @@
 import { db } from "@/db";
 import { z } from "zod"
-import { createTRPCRouter , baseProcedure } from "@/trpc/init";
+import { createTRPCRouter } from "@/trpc/init";
 import { agents } from "@/db/schema";
 import { protectedProcedure } from "@/trpc/init";
 import { agentsInsertSchema } from "../schemas";
-import { eq } from "drizzle-orm";
+import { eq, getTableColumns, sql } from "drizzle-orm";
 // import { TRPCError } from "@trpc/server";
 
 export const agentRouter = createTRPCRouter({
 
-    getOne: baseProcedure.input(z.object({
+    getOne: protectedProcedure.input(z.object({
         id: z.string()
     })).query(async ({ input }) => {
         const [exsitingAgent] = await db
-            .select()
+            .select({
+                // TODO 渲染后台实际数据
+                ...getTableColumns(agents),
+                mettingCount: sql<number>`5`
+            })
             .from(agents)
             .where(eq(agents.id , input.id));
         // throw new TRPCError({code: "BAD_REQUEST"})
