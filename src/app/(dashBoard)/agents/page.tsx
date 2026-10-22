@@ -2,7 +2,7 @@ import { AgentsView,
     AgentsViewLoading ,
     AgentsViewError} from "@/modules/agents/ui/views/agents-view"
 import { getQueryClient, trpc } from "@/trpc/server"
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
+import { dehydrate, HydrationBoundary ,noop } from "@tanstack/react-query"
 import { ErrorBoundary } from "react-error-boundary"
 import { AgentsListHeader } from "@/modules/agents/ui/components/agents-list-header"
 import { Suspense } from "react"
@@ -10,15 +10,25 @@ import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
+import { SearchParams } from "nuqs"
+import { loadSearchParams } from "@/modules/agents/params"
+
+interface Props {
+    searchParams: Promise<SearchParams>;
+
+}
 
 
+const Page = async ({ searchParams }: Props) => {
+    const filters = await loadSearchParams(searchParams)
 
-const Page = async () => {
     const session = await auth.api.getSession({
         headers: await headers(),
     })
     const queryClient = getQueryClient()
-    void queryClient.prefetchQuery(trpc.agents.getMany.queryOptions())
+    void queryClient.query(trpc.agents.getMany.queryOptions({
+        ...filters
+    })).catch(noop)
 
     if (!session) {
         redirect("/sign-in")

@@ -39,13 +39,13 @@ export const columns = columnHelper.columns([
   }),
   columnHelper.accessor("mettingCount", {
     header: "Mettings",
-    cell: () => (
+    cell: ({row}) => (
         <Badge
         variant="outline"
         className="flex items-center gap-x-2 [&>svg]:size-4" >
             <VideoIcon className="text-blue-500"/>
             {/* {row.original.mettingCount} {row.original.mettingCount === 1 ? "metting" : "mettings"} */}
-            5 mettings
+            {row.original.mettingCount} {row.original.mettingCount === 1 ? "metting" :  "mettings"}
         </Badge>
     )
   })
