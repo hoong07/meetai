@@ -55,6 +55,7 @@ export const agents = pgTable("agents" , {
     userId: text("user_id")
     .notNull()
     .references(() => user.id , { onDelete : "cascade"}), //外键约束 -> user的id 在user里的id一定存在
+    instructions: text("instructions").notNull(),
     createdAt: timestamp("createdAt").notNull().defaultNow(),
     updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 })
