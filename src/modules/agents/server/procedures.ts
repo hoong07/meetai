@@ -11,7 +11,7 @@ import {
   MAX_PAGE_SIZE,
   MIN_PAGE_SIZE,
 } from "@/constants";
-// import { TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 
 export const agentRouter = createTRPCRouter({
   getOne: protectedProcedure
@@ -20,7 +20,7 @@ export const agentRouter = createTRPCRouter({
         id: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input , ctx }) => {
       const [exsitingAgent] = await db
         .select({
           // TODO 渲染后台实际数据
@@ -28,8 +28,15 @@ export const agentRouter = createTRPCRouter({
           mettingCount: sql<number>`5`,
         })
         .from(agents)
-        .where(eq(agents.id, input.id));
-      // throw new TRPCError({code: "BAD_REQUEST"})
+        .where(and(
+          eq(agents.id, input.id),
+          eq(agents.userId, ctx.auth.user.id)
+        ));
+        
+      if (!exsitingAgent) {
+        throw new TRPCError({code: "BAD_REQUEST"})
+      }
+
       return exsitingAgent;
     }),
   getMany: protectedProcedure
