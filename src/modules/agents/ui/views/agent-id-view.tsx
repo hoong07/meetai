@@ -51,7 +51,12 @@ export const AgentIdView = ({ agentId }: Props) => {
 
         if (!ok) return
 
-        await removeAgent.mutateAsync({ id: agentId})
+        try{
+            await removeAgent.mutateAsync({ id: agentId})    
+        }catch(error){
+            console.log("删除失败",error)
+        }
+        
     }
 
     return (
@@ -78,13 +83,13 @@ export const AgentIdView = ({ agentId }: Props) => {
                         <div className="flex flex-col gap-y-2">
                             <Badge
                                 variant="outline"
-                                className="flex items-center gao-x-2 [&>svg]:size-4"
+                                className="flex items-center gap-x-2 [&>svg]:size-4"
                             >
                                 <VideoIcon className="text-blue-600"/>
-                                {data.mettingCount} {data.mettingCount === 1 ? "metting" : "mettings"}
+                                {data.mettingCount} {data.mettingCount === 1 ? "meeting" : "meetings"}
                             </Badge>
                             <div className="flex flex-col gap-y-3">
-                                <p className="text0lg font-medium">Instructions</p>
+                                <p className="text-lg font-medium">Instructions</p>
                                 <p className="text-neutral-800">{data.instructions}</p>
                             </div>
                         </div>
