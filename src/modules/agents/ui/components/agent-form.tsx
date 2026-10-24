@@ -20,17 +20,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { GeneratedRobotAvatar } from "@/components/generated-robot-avatar";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface AgentFormProps {
     onSuccess?: () => void;
     onCancel?: () => void;
-    initialValue?: AgentGetOne;
+    initialValues?: AgentGetOne;
 }
 
 export const AgentForm = ({
     onSuccess,
     onCancel,
-    initialValue,
+    initialValues,
 } :AgentFormProps) => {
     const trpc = useTRPC()
     // const router = useRouter()
@@ -43,9 +44,27 @@ export const AgentForm = ({
                     trpc.agents.getMany.queryOptions({})
                 );
 
-                if (initialValue?.id) {
+                // TODO: Invalidate free tier usage
+
+                onSuccess?.()
+            },
+            onError: (error) => {
+                toast.error(error.message)
+
+            // TODO : check if error code is "FORBIDDEN" , redirect to "/upgrade"
+            }
+        })
+    )
+    const updateAgent = useMutation(
+        trpc.agents.update.mutationOptions({
+            onSuccess: async () => {
+                await queryClient.invalidateQueries(
+                    trpc.agents.getMany.queryOptions({})
+                );
+
+                if (initialValues?.id) {
                     await queryClient.invalidateQueries(
-                        trpc.agents.getOne.queryOptions({id: initialValue.id})
+                        trpc.agents.getOne.queryOptions({id: initialValues.id})
                     )
                 }
                 onSuccess?.()
@@ -61,17 +80,17 @@ export const AgentForm = ({
     const form = useForm<z.infer<typeof agentsInsertSchema>>({
         resolver: zodResolver(agentsInsertSchema),
         defaultValues: {
-            name: initialValue?.name ?? "" ,
-            instructions: initialValue?.instructions ?? "",
+            name: initialValues?.name ?? "" ,
+            instructions: initialValues?.instructions ?? "",
         }
     })
 
-    const isEdit = !!initialValue?.id //判定表单是编辑 or create
-    const isPending = createAgent.isPending
+    const isEdit = !!initialValues?.id //判定表单是编辑 or create
+    const isPending = createAgent.isPending || updateAgent.isPending
 
     const onSubmit = (values: z.infer<typeof agentsInsertSchema>) => {
         if(isEdit) {
-            console.log("update")
+            updateAgent.mutate({...values , id: initialValues.id})
         } else {
             createAgent.mutate(values)
         }
@@ -81,9 +100,12 @@ export const AgentForm = ({
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <img src={GeneratedRobotAvatar(form.watch("name") || "robot")}
+                <Image src={GeneratedRobotAvatar(form.watch("name") || "robot")}
                  alt="avatar" 
-                className="size-9 mr-3 rounded-full"/>
+                className="mr-3 rounded-full"
+                width={36}
+                height={36}
+                />
                 <FormField 
                  name="name"
                  control={form.control}
