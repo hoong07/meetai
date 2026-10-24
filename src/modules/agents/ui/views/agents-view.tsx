@@ -41,16 +41,16 @@ export const AgentsView = () => {
 
 export const AgentsViewLoading = () => {
     return (
-        <LoadingState title="Loading Agents" 
-        description="This may take a few seconds..."/>
+        <LoadingState title="加载Agents中" 
+        description="接下来可能需要一些时间，请耐心等待..."/>
     )
 }
 
 export const AgentsViewError = () => {
     return (
         <ErrorState 
-        title="Faield to load Agents"
-        description="Please try again later"
+        title="加载Agents失败"
+        description="请一会后再次重试"
         />
     )
 }
