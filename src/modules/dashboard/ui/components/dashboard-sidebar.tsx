@@ -24,8 +24,8 @@ import { Separator } from "@/components/ui/separator"
 const firstSection = [
     {
         icon: VideoIcon,
-        label: "Meeting",
-        href: "/meeting",
+        label: "Meetings",
+        href: "/meetings",
     },
     {
         icon: BotIcon,

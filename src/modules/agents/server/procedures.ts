@@ -80,7 +80,7 @@ export const agentRouter = createTRPCRouter({
         ));
         
       if (!exsitingAgent) {
-        throw new TRPCError({code: "BAD_REQUEST"})
+        throw new TRPCError({code: "BAD_REQUEST", message: "找不到该Agent"})
       }
 
       return exsitingAgent;
