@@ -50,7 +50,7 @@ export const AgentsViewError = () => {
     return (
         <ErrorState 
         title="加载Agents失败"
-        description="请一会后再次重试"
+        description="请稍后再次重试"
         />
     )
 }
