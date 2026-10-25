@@ -3,9 +3,9 @@ import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { LoadingState } from "@/components/loading-state"
 import { ErrorState } from "@/components/error-state"
+import { DataTable } from "@/components/data-table"
 
 import { columns } from "../components/columns"
-import { DataTable } from "../components/data-table"
 import { EmptyState } from "@/components/empty-state"
 import { useAgentsFilters } from "../../hooks/use-agents-filters"
 import { DataPagination } from "../components/data-pagination"
@@ -33,7 +33,7 @@ export const AgentsView = () => {
             {data.items.length === 0 && (
                 <EmptyState 
                 title="创建你的第一个Agent" 
-                description="创建一个加入会议的Agent,每一个Agent回遵循您的指令并在通话中与参与者互动" />
+                description="创建一个加入会议的Agent,每一个Agent会遵循您的指令并在通话中与参与者互动" />
             )}
         </div>
     )

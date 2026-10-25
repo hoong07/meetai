@@ -26,8 +26,10 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "cn": "^0.4.0",
+    "date-fns": "^4.4.0",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
+    "humanize-duration": "^3.35.0",
     "lucide-react": "^1.58.0",
     "nanoid": "^6.0.2",
     "next": "15.3.2",
@@ -49,6 +51,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/humanize-duration": "^3.27.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
