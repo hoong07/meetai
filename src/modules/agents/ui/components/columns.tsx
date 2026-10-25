@@ -2,7 +2,7 @@
 
 import { createColumnHelper } from "@tanstack/react-table"
 import { type DataTableFeatures } from "./data-table-features"
-import { AgentGetOne } from "../../types"
+import { AgentGetMany } from "../../types"
 import { GeneratedRobotAvatar } from "@/components/generated-robot-avatar"
 
 import { CornerDownRightIcon } from "lucide-react"
@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge"
 // You can use a Zod schema here if you want.
 
 // Use `accessor` for data columns and `display` for columns without one.
-const columnHelper = createColumnHelper<DataTableFeatures, AgentGetOne>()
+const columnHelper = createColumnHelper<DataTableFeatures, AgentGetMany[number]>()
 
 export const columns = columnHelper.columns([
   columnHelper.accessor("name", {

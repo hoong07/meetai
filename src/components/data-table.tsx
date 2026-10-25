@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { features, type DataTableFeatures } from "../components/data-table-features"
+import { features, type DataTableFeatures } from "@/modules/agents/ui/components/data-table-features"
 
 interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<DataTableFeatures, TData>[]
