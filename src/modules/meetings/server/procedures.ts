@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { z } from "zod";
 import { createTRPCRouter } from "@/trpc/init";
-import { meetings } from "@/db/schema";
+import { agents, meetings } from "@/db/schema";
 import { protectedProcedure } from "@/trpc/init";
 import { count, desc, and, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import {
@@ -17,6 +17,18 @@ export const meetingRouter = createTRPCRouter({
   update: protectedProcedure
       .input(meetingsUpdateSchema)
       .mutation( async ({ctx , input}) => {
+        // 验证是否为本人创建
+        const [ownedAgent] = await db
+          .select({id: agents.id})
+          .from(agents)
+          .where(and(
+            eq(agents.id, input.agentId),
+            eq(agents.userId , ctx.auth.user.id)
+          ))
+        if (!ownedAgent) {
+          throw new TRPCError({code: "NOT_FOUND" , message: "找不到该Agent"})
+        }
+        
         const [ updatedMeeting ] = await db
           .update(meetings)
           .set(input)
@@ -40,6 +52,18 @@ export const meetingRouter = createTRPCRouter({
   create: protectedProcedure
       .input(meetingsInsertSchema)
       .mutation(async ({ input, ctx }) => {
+        // 验证是否为本人创建
+        const [ownedAgent] = await db
+          .select({id: agents.id})
+          .from(agents)
+          .where(and(
+            eq(agents.id, input.agentId),
+            eq(agents.userId , ctx.auth.user.id)
+          ))
+        if (!ownedAgent) {
+          throw new TRPCError({code: "NOT_FOUND" , message: "找不到该Agent"})
+        }
+
         const [createdMeeting] = await db
           .insert(meetings)
           .values({
