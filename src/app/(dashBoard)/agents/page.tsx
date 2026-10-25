@@ -20,19 +20,21 @@ interface Props {
 
 
 const Page = async ({ searchParams }: Props) => {
-    const filters = await loadSearchParams(searchParams)
-
     const session = await auth.api.getSession({
         headers: await headers(),
     })
-    const queryClient = getQueryClient()
-    void queryClient.query(trpc.agents.getMany.queryOptions({
-        ...filters
-    })).catch(noop)
 
     if (!session) {
         redirect("/sign-in")
     }
+    
+    const filters = await loadSearchParams(searchParams)
+    
+    const queryClient = getQueryClient()
+    void queryClient.query(trpc.agents.getMany.queryOptions({
+        ...filters
+    })).catch(noop)
+    
 
     return (
         <>
