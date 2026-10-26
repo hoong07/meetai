@@ -8,7 +8,7 @@ export const AgentsSearchFilter = () => {
     const [filter , setFilter] = useAgentsFilters()
 
     return (
-        <div className="relative">
+        <div className="relative w-50">
             <Input 
             placeholder="通过Agent名字筛选"
             className="h-9 bg-white w-50 pl-7"

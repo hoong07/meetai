@@ -5,25 +5,34 @@ import { MeetingsView,
     MeetingsViewLoading } from "@/modules/meetings/ui/views/meetings-view"
 import { getQueryClient, trpc } from "@/trpc/server"
 import { dehydrate, HydrationBoundary, noop } from "@tanstack/react-query"
+import { SearchParams } from "nuqs/server"
+import { loadSearchParams } from "@/modules/meetings/params"
+
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 
+interface Props {
+    searchParams: Promise<SearchParams>
+}
 
-
-const Page = async () => {
+const Page = async ({ searchParams }: Props) => {
     const session = await auth.api.getSession({
             headers: await headers(),
         })
     
-        if (!session) {
-            redirect("/sign-in")
-        }
+    if (!session) {
+        redirect("/sign-in")
+    }
+
+    const filters = await loadSearchParams(searchParams)
 
     const queryClient = getQueryClient()
     void queryClient.query(
-        trpc.meetings.getMany.queryOptions({})
+        trpc.meetings.getMany.queryOptions({
+            ...filters
+        })
     ).catch(noop)
 
     return (
