@@ -19,7 +19,7 @@ export const UpcomingState = ({
             <EmptyState
                 image="/upcoming.svg"
                 title="会议还未开始"
-                description="当你的回忆开始时，会议总结会出现在这里"
+                description="当你的会议开始时，会议总结会出现在这里"
             />
             <div className="flex flex-col-reverse lg:flex-row lg:justify-center items-center gap-2 w-full">
                 <Button
