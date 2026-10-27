@@ -8,6 +8,7 @@ import { GeneratedRobotAvatar } from "@/components/generated-robot-avatar"
 import { CornerDownRightIcon } from "lucide-react"
 import { VideoIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -21,9 +22,11 @@ export const columns = columnHelper.columns([
     cell: ({ row }) => (
         <div className="flex flex-col gap-y-1">
             <div className="flex items-center gap-x-2">
-                <img src={GeneratedRobotAvatar(row.original.name)}
+                <Image src={GeneratedRobotAvatar(row.original.name)}
                  alt="robot"
-                 className="size-6 rounded-full " />
+                 className="rounded-full "
+                 width={24}
+                 height={24} />
                  <span className="font-semibold capitalize">
                     {row.original.name}
                  </span>

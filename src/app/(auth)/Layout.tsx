@@ -5,7 +5,7 @@ interface Props {
 
 const Layout = ({ children }: Props) => {
   return (
-    <div className="flex flex-col gap-10 w-100 mx-auto mt-20">
+    <div className="flex flex-col gap-10 w-full mx-auto mt-20">
       {children}
     </div>
   )

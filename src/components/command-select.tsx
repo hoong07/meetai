@@ -11,11 +11,12 @@ import {
      CommandList,
      CommandResponsiveDialog
  } from "./ui/command";
+import { MeetingStatus } from "@/modules/meetings/types";
 
  interface Props {
     options: Array<{
-        id: string,
-        value: string,
+        id: string | MeetingStatus,
+        value: string | MeetingStatus,
         children: ReactNode
     }>
     onSelect: (value: string) => void
@@ -36,6 +37,11 @@ import {
  }: Props) => {
     const [ open , setOpen ] = useState(false)
     const selectedOption = options.find((option) => option.value === value)
+
+    const handleOpenChange = (open: boolean) => {
+        onSearch?.("")
+        setOpen(open)
+    }
 
     return (
         <>
@@ -58,7 +64,7 @@ import {
                 shouldFilter={!onSearch}
                 // command默认的本地查找 or 自己写的trpc查找
                 open={open}
-                onOpenChange={setOpen}
+                onOpenChange={handleOpenChange}
             >
                 <CommandInput placeholder="搜索..." onValueChange={onSearch} />
                 <CommandList>

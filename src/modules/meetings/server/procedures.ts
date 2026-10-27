@@ -12,6 +12,7 @@ import {
 } from "@/constants";
 import { TRPCError } from "@trpc/server";
 import { meetingsInsertSchema, meetingsUpdateSchema } from "../schemas";
+import { MeetingStatus } from "../types";
 
 export const meetingRouter = createTRPCRouter({
   update: protectedProcedure
@@ -106,18 +107,26 @@ export const meetingRouter = createTRPCRouter({
             z.object({
             page: z.number().default(DEFAULT_PAGE),
             pageSize: z
-            .number()
-            .int()
-            .min(MIN_PAGE_SIZE)
-            .max(MAX_PAGE_SIZE)
-            .default(DEFAULT_PAGE_SIZE),
+              .number()
+              .int()
+              .min(MIN_PAGE_SIZE)
+              .max(MAX_PAGE_SIZE)
+              .default(DEFAULT_PAGE_SIZE),
             search: z.string().nullish(), //用于翻页查找
-      }),{}
-      )//处理空参数
+            agentId: z.string().nullish(),
+            status: z
+              .enum([
+                MeetingStatus.Upcoming,
+                MeetingStatus.Active,
+                MeetingStatus.Completed,
+                MeetingStatus.Processing,
+                MeetingStatus.Cancelled,
+              ]).nullish()
+      }),
+      {})//处理空参数
     )
     .query(async ({ ctx, input }) => {
-        const { search , page , pageSize } = input
-
+        const { search , page , pageSize , status , agentId } = input
 
         const data = await db
         .select({
@@ -131,6 +140,8 @@ export const meetingRouter = createTRPCRouter({
           and(
             eq(meetings.userId, ctx.auth.user.id),
             search ? ilike(meetings.name, `%${search}%`) : undefined,
+            status ? eq(meetings.status , status) : undefined,
+            agentId ? eq(meetings.agentId , agentId) : undefined,
           ),
         )
         .orderBy(desc(meetings.createdAt) , desc(meetings.id))
@@ -145,8 +156,11 @@ export const meetingRouter = createTRPCRouter({
                 and(
                     eq(meetings.userId, ctx.auth.user.id),
                     search ? ilike(meetings.name, `%${search}%`) : undefined,
+                    status ? eq(meetings.status , status) : undefined,
+                    agentId ? eq(meetings.agentId , agentId) : undefined,
                 )
             )
+            
         const totalPages = Math.ceil(total.count / pageSize)
 
       // throw new TRPCError({code: "BAD_REQUEST"})
