@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
-import { MeetingIdView, MeetingIdViewError, MeetingIdViewLoading } from "@/modules/meetings/views/meeting-id-view"
+import { MeetingIdView, MeetingIdViewError, MeetingIdViewLoading } from "@/modules/meetings/ui/views/meeting-id-view"
+
 import { getQueryClient , trpc } from "@/trpc/server"
 import { dehydrate, HydrationBoundary, noop } from "@tanstack/react-query"
 import { headers } from "next/headers"

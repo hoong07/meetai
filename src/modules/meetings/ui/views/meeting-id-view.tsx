@@ -8,14 +8,18 @@ import { useTRPC } from "@/trpc/client"
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 
 import { toast } from "sonner"
-import { MeetingIdViewHeader } from "../components/meeting-id-view-header"
-import { UpdateMeetingsDialog } from "../components/update-meetings-dialog"
+
+import { useConfirm } from "@/hooks/use-confirm"
+import { MeetingIdViewHeader } from "../../components/meeting-id-view-header"
+import { UpdateMeetingsDialog } from "../../components/update-meetings-dialog"
+import { UpcomingState } from "../../components/upcoming-state"
+import { ActiveState } from "../../components/active-state"
+import { CancelledState } from "../../components/cancelled-state"
+import { ProcessingState } from "../../components/processing-state"
 
 interface Props {
     meetingId: string
 }
-import { useConfirm } from "@/hooks/use-confirm"
-
 export const MeetingIdView = ({ meetingId }: Props) => {
     const router = useRouter()
     const [updateMeetingDialogOpen , setUpdateMeetingDialogOpen] = useState(false)
@@ -57,8 +61,13 @@ export const MeetingIdView = ({ meetingId }: Props) => {
             }catch(error){
                 console.log("删除失败",error)
             }
-            
         }
+
+        const isCancelled = data.status === "cancelled"
+        const isProcessing = data.status === "processing"
+        const isCompleted = data.status === "completed"
+        const isUpcoming = data.status === "upcoming"
+        const isActive = data.status === "active"
 
     return (
         <div className="flex-1 flex flex-col px-4 py-4 gap-y-4 md:px-8">
@@ -74,7 +83,15 @@ export const MeetingIdView = ({ meetingId }: Props) => {
                 onRemove={handleRemoveMeeting}
                 onEdit={() => setUpdateMeetingDialogOpen(true)}
              />
-            {JSON.stringify(data ,null ,2)}
+            {isCancelled && <CancelledState />}
+            {isProcessing && <ProcessingState />}
+            {isCompleted && <div>isCompleted</div>}
+            {isUpcoming && <UpcomingState 
+                meetingId={meetingId}
+                onCancelMeeting={() => {}}
+                isCancelling={removeMeeting.isPending}    
+            />}
+            {isActive && <ActiveState meetingId={meetingId} />}
         </div>
     )
 }
