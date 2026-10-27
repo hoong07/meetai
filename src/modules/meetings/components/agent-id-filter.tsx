@@ -41,7 +41,7 @@ export const AgentIdFilter = () => {
                     )
                 })
             )}
-            onSelect={(value) => setFilters({ agentId: value}) }
+            onSelect={(value) => setFilters({ agentId: value , page: 1}) }
             onSearch={setAgentSearch}
             value={filters.agentId ?? ""}
         />
