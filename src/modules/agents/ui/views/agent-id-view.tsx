@@ -47,6 +47,8 @@ export const AgentIdView = ({ agentId }: Props) => {
     )
 
     const handleRemoveAgent = async () => {
+        if(removeAgent.isPending) return
+
         const ok = await confirmRemove()
 
         if (!ok) return

@@ -30,7 +30,7 @@ export const MeetingIdView = ({ meetingId }: Props) => {
     const removeMeeting = useMutation(
             trpc.meetings.remove.mutationOptions({
                 onSuccess: () => {
-                    queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}))
+                    queryClient.invalidateQueries(trpc.meetings.getMany.queryOptions({}))
                     router.push("/meetings")
                 },
                 onError: (error) => {
@@ -45,6 +45,9 @@ export const MeetingIdView = ({ meetingId }: Props) => {
         )
     
         const handleRemoveMeeting = async () => {
+            // fix 守卫
+            if(removeMeeting.isPending) return
+
             const ok = await confirmRemove()
     
             if (!ok) return
