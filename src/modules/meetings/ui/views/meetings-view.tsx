@@ -29,7 +29,7 @@ export const MeetingsView = () => {
             />
             {data.items.length === 0 && (
                 <EmptyState 
-                title="创建你的第一个Meeting" 
+                title="创建你想要的Meeting吧！" 
                 description="创建一个会议,每一个Agent会遵循您的指令并在通话中与参与者互动" />
             )}
 
