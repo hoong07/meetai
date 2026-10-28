@@ -48,7 +48,7 @@ export const CallConnect = ({
         setClient(_client)
 
         return () => {
-            _client.disconnectUser()
+            _client.disconnectUser().catch(() => {})
             setClient(undefined)
         }
     }, [userId , userName , userImage , generateToken] )
