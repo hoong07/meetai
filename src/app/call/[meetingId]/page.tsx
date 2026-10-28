@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { getQueryClient, trpc } from "@/trpc/server"
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
+import { dehydrate, HydrationBoundary, noop } from "@tanstack/react-query"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
@@ -26,7 +26,7 @@ const Page = async ({ params }: Props) => {
     const queryClient = getQueryClient()
     void queryClient.query(
         trpc.meetings.getOne.queryOptions({ id: meetingId })
-    )
+    ).catch(noop)
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>

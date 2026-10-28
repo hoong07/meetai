@@ -3,6 +3,7 @@ import { useState } from "react"
 import { CallLobby } from "./call-lobby"
 import { CallActive } from "./call-active"
 import { CallEnded } from "./call-ended"
+import { toast } from "sonner"
 
 interface Props {
     meetingName: string
@@ -15,16 +16,25 @@ export const CallUI = ({ meetingName }: Props) => {
     const handleJoin = async () => {
         if (!call) return
 
-        await call.join()
-
-        setShow("call")
+        try {
+            await call.join()
+            setShow("call")
+        }
+        catch{
+            toast.error("加入会议失败，请稍后尝试")
+        }
     }
 
     const handleLeave = async () => {
         if (!call) return 
-
-        await call.leave()
-        setShow("ended")
+        try{
+            await call.leave()
+            setShow("ended")
+        }
+        catch{
+            toast.error("退出会议失败，请稍后再试")
+        }
+        
     }
 
     return (

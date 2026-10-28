@@ -25,7 +25,6 @@ export const CallProvider = ({ meetingId , meetingName }: Props) => {
     }
 
     return (
-        
         <CallConnect
             meetingId={meetingId}
             meetingName={meetingName}

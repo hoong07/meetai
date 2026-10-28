@@ -1,4 +1,3 @@
-"use client"
 import { LoaderIcon } from "lucide-react"
 import { useEffect , useState } from "react"
 import { useTRPC } from "@/trpc/client"
@@ -66,10 +65,9 @@ export const CallConnect = ({
         return () => {
             if (_call.state.callingState !== CallingState.LEFT)
             {
-                _call.leave()
-                _call.endCall()
-                setCall(undefined)
+                _call.leave().catch(() => {})
             }
+            setCall(undefined)
     };
   }, [client , meetingId]);
 
