@@ -1,8 +1,8 @@
 import { Avatar , Style } from "@dicebear/core"
-import definition from "@dicebear/styles/bottts.json" with {type: 'json'}
+import botttsNeutralStyle from "@dicebear/styles/bottts-neutral.json"
 
 export const GeneratedRobotAvatar = (seed: string) => {
-    const style = new Style(definition)
+    const style = new Style(botttsNeutralStyle)
     const avatar = new Avatar(style,{
         seed: seed || "robot",
         borderRadius: 50,
