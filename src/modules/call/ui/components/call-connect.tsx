@@ -1,15 +1,11 @@
+"use client"
+
+import { useEffect, useMemo, useState } from "react"
 import { LoaderIcon } from "lucide-react"
-import { useEffect , useState } from "react"
+import AgoraRTC from "agora-rtc-react"
+import { AgoraRTCProvider } from "agora-rtc-react"
+
 import { useTRPC } from "@/trpc/client"
-
-import {
-    Call,
-    CallingState,
-    StreamCall,
-    StreamVideo,
-    StreamVideoClient,
-} from "@stream-io/video-react-sdk"
-
 import { useMutation } from "@tanstack/react-query"
 import { CallUI } from "./call-ui"
 
@@ -21,57 +17,37 @@ interface Props {
     userImage: string
 }
 
-export const CallConnect = ({
-    meetingId, 
-    meetingName,
-    userId,
-    userName,
-    userImage,
-}: Props) => {
+type Credentials = {
+    appId: string
+    channel: string
+    uid: number
+    token: string
+}
+
+export const CallConnect = ({ meetingId, meetingName }: Props) => {
     const trpc = useTRPC()
-    const { mutateAsync : generateToken} = useMutation(
+    const { mutateAsync: fetchCredentials } = useMutation(
         trpc.meetings.generateToken.mutationOptions(),
     )
 
-    const [client , setClient] = useState<StreamVideoClient>()
+    const [credentials, setCredentials] = useState<Credentials>()
+
     useEffect(() => {
-        const _client = new StreamVideoClient({
-            apiKey: process.env.NEXT_PUBLIC_STREAM_VIDEO_API_KEY!,
-            user: {
-                id: userId,
-                name: userName,
-                image: userImage,
-            },
-            tokenProvider: generateToken,
+        let cancelled = false
+        fetchCredentials({ meetingId }).then((c) => {
+            if (!cancelled) setCredentials(c)
         })
-
-        setClient(_client)
-
         return () => {
-            _client.disconnectUser().catch(() => {})
-            setClient(undefined)
+            cancelled = true
         }
-    }, [userId , userName , userImage , generateToken] )
+    }, [meetingId, fetchCredentials])
 
-    const [call , setCall] = useState<Call>()
-    useEffect(() => {
-        if(!client) return
+    const client = useMemo(
+        () => AgoraRTC.createClient({ mode: "rtc", codec: "vp8" }),
+        [],
+    )
 
-        const _call = client.call("default", meetingId);
-        _call.camera.disable()
-        _call.microphone.disable()
-
-        setCall(_call);
-        return () => {
-            if (_call.state.callingState !== CallingState.LEFT)
-            {
-                _call.leave().catch(() => {})
-            }
-            setCall(undefined)
-    };
-  }, [client , meetingId]);
-
-    if (!client || !call) {
+    if (!credentials) {
         return (
             <div className="flex h-screen items-center justify-center bg-radial from-sidebar-accent to-sidebar">
                 <LoaderIcon className="size-6 animate-spin text-white"/>
@@ -80,10 +56,12 @@ export const CallConnect = ({
     }
 
     return (
-        <StreamVideo client={client}>
-            <StreamCall call={call}>
-                <CallUI meetingName={meetingName} />
-            </StreamCall>
-        </StreamVideo>
+        <AgoraRTCProvider client={client}>
+            <CallUI
+                meetingId={meetingId}
+                meetingName={meetingName}
+                credentials={credentials}
+            />
+        </AgoraRTCProvider>
     )
 }
