@@ -45,6 +45,12 @@ export async function POST(req: NextRequest) {
 
   const eventType = msg.eventType;
   const payload = msg.payload ?? {};
+
+  // 声网 Webhook 健康检查（带 channelName + uid，没有 eventType），直接返回 200
+  if (!eventType) {
+    return NextResponse.json({ status: "ok" });
+  }
+
   const meetingId = payload.channel;
 
   // 声网回调的 channel 名就是我们存的 meetingId
@@ -62,7 +68,7 @@ export async function POST(req: NextRequest) {
       // agent 离开（用户离开 / 空闲超时 / 出错），标记会议结束
       await db
         .update(meetings)
-        .set({ status: "completed", endedAt: new Date() })
+        .set({ status: "processing", endedAt: new Date() })
         .where(eq(meetings.id, meetingId));
       break;
     }
@@ -81,7 +87,7 @@ export async function POST(req: NextRequest) {
         const summary = await summarizeTranscript(transcript);
         await db
           .update(meetings)
-          .set({ summary })
+          .set({ summary , status: "completed" })
           .where(eq(meetings.id, meetingId));
       } catch (err) {
         console.error("总结转写失败:", err);

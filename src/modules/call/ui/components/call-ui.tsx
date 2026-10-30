@@ -20,10 +20,11 @@ import { CallEnded } from "./call-ended"
 interface Props {
     meetingId: string
     meetingName: string
+    agentName: string
     credentials: { appId: string; channel: string; uid: number; token: string }
 }
 
-export const CallUI = ({ meetingId, meetingName, credentials }: Props) => {
+export const CallUI = ({ meetingId, meetingName, agentName, credentials }: Props) => {
     const [show, setShow] = useState<"lobby" | "call" | "ended">("lobby")
 
     const trpc = useTRPC()
@@ -81,6 +82,7 @@ export const CallUI = ({ meetingId, meetingName, credentials }: Props) => {
     return (
         <CallActive
             meetingName={meetingName}
+            agentName={agentName}
             localCameraTrack={localCameraTrack}
             onLeave={handleLeave}
         />

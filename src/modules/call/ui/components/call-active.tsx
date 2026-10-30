@@ -7,19 +7,23 @@ import { LocalUser, RemoteUser, useRemoteUsers } from "agora-rtc-react"
 import type { ICameraVideoTrack } from "agora-rtc-react"
 
 import { Button } from "@/components/ui/button"
+import { generateAvatarUri } from "@/lib/avatar"
 
 interface Props {
     meetingName: string
+    agentName: string
     localCameraTrack: ICameraVideoTrack | null
     onLeave: () => void
 }
 
 export const CallActive = ({
     meetingName,
+    agentName,
     localCameraTrack,
     onLeave,
 }: Props) => {
     const remoteUsers = useRemoteUsers()
+    const agentAvatar = generateAvatarUri({ seed: agentName, variant: "botttsNeutralStyle" })
 
     return (
         <div className="flex flex-col justify-between p-4 h-full text-white">
@@ -35,7 +39,12 @@ export const CallActive = ({
             <div className="flex-1 py-4 min-h-0 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <LocalUser videoTrack={localCameraTrack} cameraOn={true} micOn={true} />
                 {remoteUsers.map((user) => (
-                    <RemoteUser key={String(user.uid)} user={user} />
+                    <RemoteUser
+                        key={String(user.uid)}
+                        user={user}
+                        cover={agentAvatar}
+                        playVideo={Boolean(user.hasVideo)}
+                    />
                 ))}
             </div>
 

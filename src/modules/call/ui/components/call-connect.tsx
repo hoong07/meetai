@@ -12,6 +12,7 @@ import { CallUI } from "./call-ui"
 interface Props {
     meetingId: string
     meetingName: string
+    agentName: string
     userId: string
     userName: string
     userImage: string
@@ -24,7 +25,7 @@ type Credentials = {
     token: string
 }
 
-export const CallConnect = ({ meetingId, meetingName }: Props) => {
+export const CallConnect = ({ meetingId, meetingName, agentName }: Props) => {
     const trpc = useTRPC()
     const { mutateAsync: fetchCredentials } = useMutation(
         trpc.meetings.generateToken.mutationOptions(),
@@ -42,10 +43,12 @@ export const CallConnect = ({ meetingId, meetingName }: Props) => {
         }
     }, [meetingId, fetchCredentials])
 
-    const client = useMemo(
-        () => AgoraRTC.createClient({ mode: "rtc", codec: "vp8" }),
-        [],
-    )
+    const client = useMemo(() => {
+        const c = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
+        // 强制走云代理 TCP/TLS 443，绕过被防火墙拦掉的 4710 端口
+        c.startProxyServer(5)
+        return c
+    }, [])
 
     if (!credentials) {
         return (
@@ -60,6 +63,7 @@ export const CallConnect = ({ meetingId, meetingName }: Props) => {
             <CallUI
                 meetingId={meetingId}
                 meetingName={meetingName}
+                agentName={agentName}
                 credentials={credentials}
             />
         </AgoraRTCProvider>

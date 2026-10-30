@@ -39,10 +39,13 @@ export const meetingRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "找不到该会议" })
       }
 
-      // 幂等：已经 active 就不再重复启动 agent，避免同一频道出现多个 agent
-      if (meeting.status === "active") {
-        return { ok: true, alreadyActive: true }
-      }
+      // 注意：不要因为 meeting.status === "active" 就跳过启动 agent。
+      // 会议可能因为 agent 没真正进频道、或 webhook 未触发而卡在 active，
+      // 那样会导致重新加入时永远不创建 agent。这里每次都启动一个 agent。
+      await db
+        .update(meetings)
+        .set({ status: "active", startedAt: new Date() })
+        .where(eq(meetings.id, meeting.id))
 
       const [agent] = await db
         .select()
@@ -52,11 +55,6 @@ export const meetingRouter = createTRPCRouter({
       if (!agent) {
         throw new TRPCError({ code: "NOT_FOUND", message: "找不到该 Agent" })
       }
-
-      await db
-        .update(meetings)
-        .set({ status: "active", startedAt: new Date() })
-        .where(eq(meetings.id, meeting.id))
 
       await startAgent({
         channel: meeting.id,

@@ -105,7 +105,7 @@ export async function startAgent(opts: {
   );
 
   const body = {
-    name: `${opts.agentName}-${opts.channel}`,
+    name: `${opts.agentName}-${opts.channel}-${Date.now()}`,
     properties: {
       channel: opts.channel,
       token: agentToken,
@@ -143,7 +143,8 @@ export async function startAgent(opts: {
     throw err;
   }
 
-  const json = (await res.json()) as { agent_id: string };
+  const json = (await res.json()) as { agent_id: string; status?: string; create_ts?: number };
+  console.log("[agora startAgent] agent created:", JSON.stringify(json));
   return json.agent_id;
 }
 
@@ -173,7 +174,7 @@ export async function summarizeTranscript(transcript: string): Promise<string> {
         {
           role: "system",
           content:
-            "你是一名会议纪要助手。请用简洁的中文总结下面的师生对话，提炼要点、结论和待办事项。",
+            "你是一名会议纪要助手。请用简洁的中文总结下面的对话，提炼要点、结论和待办事项。",
         },
         { role: "user", content: transcript },
       ],
