@@ -45,18 +45,14 @@ export async function POST(req: NextRequest) {
 
   const eventType = msg.eventType;
   const payload = msg.payload ?? {};
+  const meetingId = payload.channel;
 
-  // 声网 Webhook 健康检查（带 channelName + uid，没有 eventType），直接返回 200
-  if (!eventType) {
+  // 健康检查 / 未知事件：没有 eventType 或没有 channel 时直接返回 200，避免声网反复重试
+  if (!eventType || !meetingId) {
     return NextResponse.json({ status: "ok" });
   }
 
-  const meetingId = payload.channel;
-
-  // 声网回调的 channel 名就是我们存的 meetingId
-  if (!meetingId) {
-    return NextResponse.json({ error: "Missing channel" }, { status: 400 });
-  }
+  console.log("[agora webhook] eventType =", eventType, ", channel =", meetingId, ", payload =", JSON.stringify(payload));
 
   switch (eventType) {
     case EVENT_AGENT_JOINED: {
@@ -87,11 +83,15 @@ export async function POST(req: NextRequest) {
         const summary = await summarizeTranscript(transcript);
         await db
           .update(meetings)
-          .set({ summary , status: "completed" })
+          .set({ summary , transcriptUrl: transcript , status: "completed" })
           .where(eq(meetings.id, meetingId));
       } catch (err) {
         console.error("总结转写失败:", err);
-        // 总结失败不阻断 webhook 返回，避免声网反复重试
+        // 总结失败也把转写文本落库
+        await db
+          .update(meetings)
+          .set({ transcriptUrl: transcript , status: "completed" })
+          .where(eq(meetings.id, meetingId));
       }
       break;
     }
