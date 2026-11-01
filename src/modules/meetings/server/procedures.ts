@@ -13,29 +13,58 @@ import {
 import { TRPCError } from "@trpc/server";
 import { meetingsInsertSchema, meetingsUpdateSchema } from "../schemas";
 import { MeetingStatus } from "../types";
-import { streamVideo } from "@/lib/stream-video"
-import { generateAvatarUri } from "@/lib/avatar";
+import { getJoinCredentials, startAgent, stringToUid } from "@/lib/agora";
 
 export const meetingRouter = createTRPCRouter({
-  generateToken: protectedProcedure.mutation(async ({ ctx }) => {
-    await streamVideo.upsertUsers([
-      {
-        id: ctx.auth.user.id,
-        name: ctx.auth.user.name,
-        role: "user",
-        image: 
-          ctx.auth.user.image ??
-          generateAvatarUri({ seed: ctx.auth.user.name , variant: "initialsStyle"}),
-      }
-    ])
-
-    const token = streamVideo.generateUserToken({
-      user_id: ctx.auth.user.id,
-      validity_in_seconds: 3600, //一小时过期
+  generateToken: protectedProcedure
+    .input(z.object({ meetingId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return getJoinCredentials(input.meetingId, ctx.auth.user.id)
     })
-    return token
+  ,
+  start: protectedProcedure
+    .input(z.object({ meetingId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const [meeting] = await db
+        .select()
+        .from(meetings)
+        .where(
+          and(
+            eq(meetings.id, input.meetingId),
+            eq(meetings.userId, ctx.auth.user.id),
+          ),
+        )
 
-  })
+      if (!meeting) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "找不到该会议" })
+      }
+
+      // 注意：不要因为 meeting.status === "active" 就跳过启动 agent。
+      // 会议可能因为 agent 没真正进频道、或 webhook 未触发而卡在 active，
+      // 那样会导致重新加入时永远不创建 agent。这里每次都启动一个 agent。
+      await db
+        .update(meetings)
+        .set({ status: "active", startedAt: new Date() })
+        .where(eq(meetings.id, meeting.id))
+
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.id, meeting.agentId))
+
+      if (!agent) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "找不到该 Agent" })
+      }
+
+      await startAgent({
+        channel: meeting.id,
+        agentName: agent.name,
+        instructions: agent.instructions,
+        remoteUids: [stringToUid(ctx.auth.user.id)],
+      })
+
+      return { ok: true }
+    })
   ,
   remove: protectedProcedure
       .input(z.object({ id: z.string() }))
@@ -117,53 +146,6 @@ export const meetingRouter = createTRPCRouter({
           })
           .returning();
 
-          // TODO: Create Stream Call , upsert Stream Users
-          const call = streamVideo.video.call("default" , createdMeeting.id)
-          await call.create({
-            data: {
-              created_by_id: ctx.auth.user.id,
-              custom: {
-                meetingId: createdMeeting.id,
-                meetingName: createdMeeting.name
-              },
-              settings_override :{
-                transcription: {
-                  language: "zh",
-                  mode: "auto-on",
-                  closed_caption_mode: "auto-on",
-                },
-                recording: {
-                  mode: "auto-on",
-                  quality: "1080p"
-                },
-              },
-            },
-          })
-
-        const [existingAgent] = await db
-          .select()
-          .from(agents)
-          .where(eq(agents.id , createdMeeting.agentId))
-
-        if (!existingAgent) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Agent not found"
-          })
-        }
-
-        await streamVideo.upsertUsers([
-          {
-            id: existingAgent.id,
-            name: existingAgent.name,
-            role: "user",
-            image: generateAvatarUri({
-              seed: existingAgent.name,
-              variant: "botttsNeutralStyle",
-            })
-          }
-        ])
-  
         return createdMeeting;
       }),
   

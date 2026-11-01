@@ -6,14 +6,20 @@ import { authClient } from "@/lib/auth-client"
 import { generateAvatarUri } from "@/lib/avatar"
 
 
-import { CallConnect } from "./call-connect"
+import dynamic from "next/dynamic"
+
+const DynamicCallConnect = dynamic(
+    () => import("./call-connect").then((mod) => mod.CallConnect),
+    { ssr: false }
+)
 
 interface Props {
     meetingId: string
     meetingName: string
-    
+    agentName: string
+
 }
-export const CallProvider = ({ meetingId , meetingName }: Props) => {
+export const CallProvider = ({ meetingId , meetingName , agentName }: Props) => {
     const { data , isPending } = authClient.useSession()
 
     if (!data || isPending) {
@@ -25,9 +31,10 @@ export const CallProvider = ({ meetingId , meetingName }: Props) => {
     }
 
     return (
-        <CallConnect
+        <DynamicCallConnect
             meetingId={meetingId}
             meetingName={meetingName}
+            agentName={agentName}
             userId={data.user.id}
             userName={data.user.name}
             userImage={
