@@ -100,7 +100,7 @@ export const CompletedState = ({ data }: Props) => {
                                             <ul className="list-disc list-inside mb-6" {...props}></ul>
                                         ),
                                         ol: (props) => (
-                                            <ol className="list-disc list-inside mb-6" {...props}></ol>
+                                            <ol className="list-list-decimal list-inside mb-6" {...props}></ol>
                                         ),
                                         li: (props) => <li className="mb-1" {...props}></li>,
                                         strong: (props) => (

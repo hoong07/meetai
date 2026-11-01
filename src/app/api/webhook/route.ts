@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: "ok" });
   }
 
-  console.log("[agora webhook] eventType =", eventType, ", channel =", meetingId, ", payload =", JSON.stringify(payload));
+//   console.log("[agora webhook] eventType =", eventType, ", channel =", meetingId, ", payload =", JSON.stringify(payload));
 
   switch (eventType) {
     case EVENT_AGENT_JOINED: {
