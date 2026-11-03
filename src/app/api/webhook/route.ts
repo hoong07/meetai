@@ -34,10 +34,18 @@ export async function POST(req: NextRequest) {
     payload?: {
       channel?: string;
       status?: string;
-      contents?: { role?: string; content?: string }[];
+      agent_id?: string;
+      contents?: { 
+          role?: string;
+          content?: string;
+          speech_end_ms?: number;
+          speech_start_ms?: number;
+          turn_id: number;
+         }[];
     };
   };
   try {
+    console.log(rawBody)
     msg = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -52,7 +60,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: "ok" });
   }
 
-//   console.log("[agora webhook] eventType =", eventType, ", channel =", meetingId, ", payload =", JSON.stringify(payload));
+  //console.log("[agora webhook] eventType =", eventType, ", channel =", meetingId, ", payload =", JSON.stringify(payload));
 
   switch (eventType) {
     case EVENT_AGENT_JOINED: {
@@ -74,23 +82,25 @@ export async function POST(req: NextRequest) {
       const contents = payload.contents ?? [];
       const transcript = contents
         .filter((c) => c.content)
-        .map((c) => `${c.role === "user" ? "学生" : "AI老师"}: ${c.content}`)
-        .join("\n");
+        // .map((c) => `${c.role === "user" ? "学生" : "AI老师"}: ${c.content}`)
+        // .join("\n");
+      const transcriptForSummary = contents.filter((c) => c.content).join("\n")
+      const transcriptData = JSON.stringify(payload)
 
       if (!transcript) break;
 
       try {
-        const summary = await summarizeTranscript(transcript);
+        const summary = await summarizeTranscript(transcriptForSummary);
         await db
           .update(meetings)
-          .set({ summary , transcriptUrl: transcript , status: "completed" })
+          .set({ summary , transcriptUrl: transcriptData , status: "completed" })
           .where(eq(meetings.id, meetingId));
       } catch (err) {
         console.error("总结转写失败:", err);
         // 总结失败也把转写文本落库
         await db
           .update(meetings)
-          .set({ transcriptUrl: transcript , status: "completed" })
+          .set({ transcriptUrl: transcriptData , status: "completed" })
           .where(eq(meetings.id, meetingId));
       }
       break;
