@@ -32,15 +32,15 @@ export const meetingRouter = createTRPCRouter({
       }
 
       if(!existingMeeting.transcriptUrl) {
-        return []
+        return { contents: [] , speakers: []}
       
       }
       const transcript =  JSON.parse(existingMeeting.transcriptUrl || "[]") as AgoraPayload
       const contents =transcript.contents as AgoraTranscriptItem[] ?? []
       const agentId = transcript.agent_id
-      const agentSpeakers = null
+      let agentSpeakers = null
       if (agentId) {
-        const agentSpeakers = await db
+        agentSpeakers = await db
         .select()
         .from(agents)
         .where(eq(agents.id , agentId))
@@ -60,7 +60,7 @@ export const meetingRouter = createTRPCRouter({
           image:
             user.image ?? generateAvatarUri({ seed: user.name , variant: "initialsStyle"})
         }))   
-      return [ agentSpeakers , userSpeakers ]
+      return { contents , speakers:[ agentSpeakers , userSpeakers ]}
 
     })
   ,

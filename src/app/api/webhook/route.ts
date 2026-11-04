@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     };
   };
   try {
-    console.log(rawBody)
+    // console.log(rawBody)
     msg = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -82,15 +82,15 @@ export async function POST(req: NextRequest) {
       const contents = payload.contents ?? [];
       const transcript = contents
         .filter((c) => c.content)
-        // .map((c) => `${c.role === "user" ? "学生" : "AI老师"}: ${c.content}`)
-        // .join("\n");
-      const transcriptForSummary = contents.filter((c) => c.content).join("\n")
+        .map((c) => `${c.role === "user" ? "用户" : "AI助手"}: ${c.content}`)
+        .join("\n");
+
       const transcriptData = JSON.stringify(payload)
 
       if (!transcript) break;
 
       try {
-        const summary = await summarizeTranscript(transcriptForSummary);
+        const summary = await summarizeTranscript(transcript);
         await db
           .update(meetings)
           .set({ summary , transcriptUrl: transcriptData , status: "completed" })
