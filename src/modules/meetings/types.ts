@@ -13,3 +13,18 @@ export enum MeetingStatus {
     Processing = "processing",
     Cancelled = "cancelled",
 }
+
+export type AgoraTranscriptItem = {
+    content: string
+    role: string
+    speech_end_ms: number
+    speech_start_ms: number
+    turn_id: number
+}
+
+export type AgoraPayload = {
+      channel?: string;
+      status?: string;
+      agent_id?: string;
+      contents?: AgoraTranscriptItem[];
+    };

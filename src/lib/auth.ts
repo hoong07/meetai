@@ -4,7 +4,23 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db"; // your drizzle instance
 import * as schema from "@/db/schema"; // your drizzle schema
 
+import { polarClient } from "./polar";
+import { polar, checkout, portal } from "@polar-sh/better-auth";
+
 export const auth = betterAuth({
+    plugins: [
+        polar({ 
+            client: polarClient, 
+            createCustomerOnSignUp: true, 
+            use: [ 
+                checkout({ 
+                    authenticatedUsersOnly: true,
+                    successUrl: "/upgrade",
+                }), 
+                portal(), 
+            ], 
+        }) 
+    ],
     socialProviders: {
         github: { 
             clientId: process.env.GITHUB_CLIENT_ID as string, 

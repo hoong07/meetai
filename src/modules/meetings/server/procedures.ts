@@ -1,9 +1,9 @@
 import { db } from "@/db";
 import { z } from "zod";
 import { createTRPCRouter } from "@/trpc/init";
-import { agents, meetings } from "@/db/schema";
+import { agents, meetings, user } from "@/db/schema";
 import { protectedProcedure } from "@/trpc/init";
-import { count, desc, and, eq, getTableColumns, ilike, sql } from "drizzle-orm";
+import { count, desc, and, eq, getTableColumns, ilike, sql, inArray } from "drizzle-orm";
 import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
@@ -12,10 +12,58 @@ import {
 } from "@/constants";
 import { TRPCError } from "@trpc/server";
 import { meetingsInsertSchema, meetingsUpdateSchema } from "../schemas";
-import { MeetingStatus } from "../types";
+import { AgoraPayload, AgoraTranscriptItem, MeetingStatus } from "../types";
 import { getJoinCredentials, startAgent, stringToUid } from "@/lib/agora";
+import { generateAvatarUri } from "@/lib/avatar";
 
 export const meetingRouter = createTRPCRouter({
+  getTranscript: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input , ctx }) => {
+      const [existingMeeting] = await db
+        .select()
+        .from(meetings)
+        .where(
+          and(eq(meetings.id , input.id) , eq(meetings.userId , ctx.auth.user.id))
+        )
+
+      if (!existingMeeting) {
+        throw new TRPCError({ code: "NOT_FOUND" , message: "Meeting Not Found"})
+      }
+
+      if(!existingMeeting.transcriptUrl) {
+        return { contents: [] , speakers: []}
+      
+      }
+      const transcript =  JSON.parse(existingMeeting.transcriptUrl || "[]") as AgoraPayload
+      const contents =transcript.contents as AgoraTranscriptItem[] ?? []
+      const agentId = transcript.agent_id
+      let agentSpeakers = null
+      if (agentId) {
+        agentSpeakers = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.id , agentId))
+        .limit(1)
+        .then(( [agent] ) => ({
+          ...agent,
+          image: generateAvatarUri({ seed: agent.name , variant: "botttsNeutralStyle"})
+        }))
+      }
+      const userSpeakers = await db
+        .select()
+        .from(user)
+        .where(eq(user.id , ctx.auth.user.id))
+        .limit(1)
+        .then(( [user] ) => ({
+          ...user,
+          image:
+            user.image ?? generateAvatarUri({ seed: user.name , variant: "initialsStyle"})
+        }))   
+      return { contents , speakers:[ agentSpeakers , userSpeakers ]}
+
+    })
+  ,
   generateToken: protectedProcedure
     .input(z.object({ meetingId: z.string() }))
     .mutation(async ({ ctx, input }) => {
