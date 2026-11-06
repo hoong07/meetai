@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 
 import { BotIcon, StarIcon, VideoIcon } from "lucide-react"
 import { DashboardUserButton } from "./dashboard-userbutton"
+import { DashboardTrial } from "./dashboard-trial"
 
 import {
     Sidebar,
@@ -127,7 +128,10 @@ const DashboardSidebar = () => {
 
             {/* 底部 个人信息区域 */}
             <SidebarFooter>
-                <DashboardUserButton></DashboardUserButton>
+                <div className="text-white">
+                    <DashboardTrial />
+                    <DashboardUserButton />
+                </div>
             </SidebarFooter>
         </Sidebar>
     )
