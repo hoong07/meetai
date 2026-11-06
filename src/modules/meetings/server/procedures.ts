@@ -1,9 +1,9 @@
 import { db } from "@/db";
 import { z } from "zod";
-import { createTRPCRouter } from "@/trpc/init";
+import { createTRPCRouter, premiumProcedure } from "@/trpc/init";
 import { agents, meetings, user } from "@/db/schema";
 import { protectedProcedure } from "@/trpc/init";
-import { count, desc, and, eq, getTableColumns, ilike, sql, inArray } from "drizzle-orm";
+import { count, desc, and, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
@@ -32,24 +32,27 @@ export const meetingRouter = createTRPCRouter({
       }
 
       if(!existingMeeting.transcriptUrl) {
-        return { contents: [] , speakers: []}
+        return []
       
       }
       const transcript =  JSON.parse(existingMeeting.transcriptUrl || "[]") as AgoraPayload
       const contents =transcript.contents as AgoraTranscriptItem[] ?? []
-      const agentId = transcript.agent_id
-      let agentSpeakers = null
-      if (agentId) {
-        agentSpeakers = await db
+      // const agentId = transcript.agent_id
+      const agentId = existingMeeting.agentId
+      const [agent] = await db
         .select()
         .from(agents)
         .where(eq(agents.id , agentId))
         .limit(1)
-        .then(( [agent] ) => ({
+      let agentSpeakers = null
+
+      if (agent) {
+        agentSpeakers = {
           ...agent,
-          image: generateAvatarUri({ seed: agent.name , variant: "botttsNeutralStyle"})
-        }))
+          image: generateAvatarUri({ seed: agent.name ?? "默认AI", variant: "botttsNeutralStyle"})
+        }
       }
+
       const userSpeakers = await db
         .select()
         .from(user)
@@ -59,9 +62,32 @@ export const meetingRouter = createTRPCRouter({
           ...user,
           image:
             user.image ?? generateAvatarUri({ seed: user.name , variant: "initialsStyle"})
-        }))   
-      return { contents , speakers:[ agentSpeakers , userSpeakers ]}
-
+        }))
+    
+      const transcriptWithSpeakers = contents.map((item) => {
+        if(item.role === "assistant") {
+          return {
+            speaker: {
+                  ...agentSpeakers
+                },
+            role: item.role,
+            content: item.content,
+            speech_start_ms: item.speech_start_ms,
+            speech_end_ms: item.speech_end_ms,
+          }
+        } else {
+          return {
+            speaker: {
+                  ...userSpeakers
+                },
+            role: item.role,
+            content: item.content,
+            speech_start_ms: item.speech_start_ms,
+            speech_end_ms: item.speech_end_ms,
+          }
+        }
+      })
+      return transcriptWithSpeakers
     })
   ,
   generateToken: protectedProcedure
@@ -171,7 +197,7 @@ export const meetingRouter = createTRPCRouter({
           return updatedMeeting
       })
     ,
-  create: protectedProcedure
+  create: premiumProcedure("meetings")
       .input(meetingsInsertSchema)
       .mutation(async ({ input, ctx }) => {
         // 验证是否为本人创建

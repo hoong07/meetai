@@ -16,6 +16,7 @@ import { Tabs , TabsContent , TabsList , TabsTrigger } from "@/components/ui/tab
 import { format } from "date-fns"
 import { formatDuration } from "@/lib/utils"
 import Markdown from "react-markdown"
+import { Transcript } from "./transcript"
 
 interface Props {
     data: MeetingGetOne
@@ -125,6 +126,9 @@ export const CompletedState = ({ data }: Props) => {
                             </div>
                         </div>
                     </div>
+                </TabsContent>
+                <TabsContent value="transcript">
+                    <Transcript meetingId={data.id} />
                 </TabsContent>
             </Tabs>
         </div>
