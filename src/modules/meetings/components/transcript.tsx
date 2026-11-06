@@ -53,7 +53,8 @@ export const Transcript = ({ meetingId }: Props) => {
                                         <p className="text-sm font-medium">{item.speaker.name}</p>
                                         <p className="text-sm text-blue-500 font-medium">
                                             {format(
-                                                new Date(0,0,0,0,0,0,item.speech_start_ms), "mm:ss"
+                                                new Date(item.speech_start_ms), 
+                                                "HH:mm:ss"
                                             )}
                                         </p>
                                     </div>
