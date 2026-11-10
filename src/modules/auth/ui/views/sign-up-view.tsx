@@ -96,6 +96,7 @@ const SignUpView = () => {
             },
             onSuccess: () => {
                 setPending(false)
+                router.push("/")
             }
         }
     )
