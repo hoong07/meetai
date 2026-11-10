@@ -58,6 +58,8 @@ export const DashboardCommand = ( { open , setOpen }: Props) => {
                         <CommandItem
                             onSelect={() => {
                                 router.push(`/meetings/${meeting.id}`)
+                                setOpen(false)
+                                setSearch("")
                             }}
                             key={meeting.id}
                         >
@@ -75,6 +77,8 @@ export const DashboardCommand = ( { open , setOpen }: Props) => {
                         <CommandItem
                             onSelect={() => {
                                 router.push(`/agents/${agent.id}`)
+                                setOpen(false)
+                                setSearch("")
                             }}
                             key={agent.id}
                         >
